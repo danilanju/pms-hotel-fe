@@ -1,24 +1,49 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Login from "./pages/Login";
+import DashboardLayout from "./components/DashboardLayout";
+import Rooms from "./pages/Rooms";
+
+// Komponen untuk memproteksi rute (hanya yang punya token bisa akses)
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" />;
+};
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <Router>
+      <Routes>
+        {/* Public Route */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected Routes (Dashboard) */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardLayout />
+            </PrivateRoute>
+          }
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          {/* Nested Routes inside Dashboard */}
+          <Route
+            index
+            element={<div className="text-2xl">Welcome to Dashboard</div>}
+          />
+          <Route path="rooms" element={<Rooms />} />
+          {/* Tambahkan rute Users, Settings, dll di sini */}
+        </Route>
+
+        {/* Redirect root to login */}
+        <Route path="/" element={<Navigate to="/login" />} />
+      </Routes>
+    </Router>
   );
 }
 
